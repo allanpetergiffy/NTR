@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noel Thomas Robin | Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --accent: #6366f1; --bg: #ffffff; --text: #0f172a; --glass: rgba(255, 255, 255, 0.7); }
+        .dark { --bg: #050505; --text: #f8fafc; --accent: #818cf8; --glass: rgba(15, 23, 42, 0.8); }
+        
+        body { background-color: var(--bg); color: var(--text); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .glass { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(128,128,128,0.2); }
+        .gradient-text { background: linear-gradient(90deg, #6366f1, #ec4899, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .timeline-line { width: 2px; background: linear-gradient(to bottom, #6366f1, transparent); }
+        .terminal-box { font-family: 'Fira Code', monospace; background: #000; color: #10b981; }
+        
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .floating { animation: float 4s ease-in-out infinite; }
+    </style>
+</head>
+<body class="dark overflow-x-hidden">
+
+    <nav class="fixed top-0 w-full z-50 glass px-6 py-4 flex justify-between items-center shadow-lg">
+        <div class="font-black text-2xl tracking-tighter">NTR<span class="text-indigo-500">.</span></div>
+        <div class="flex gap-4 items-center">
+            <button onclick="document.body.classList.toggle('dark')" class="p-2 rounded-full hover:bg-gray-500/10 transition">
+                <i data-lucide="sun-moon"></i>
+            </button>
+            <a href="admin.html" class="p-2 opacity-30 hover:opacity-100 transition"><i data-lucide="settings"></i></a>
+        </div>
+    </nav>
+
+    <header class="min-h-screen flex flex-col justify-center items-center px-6 relative">
+        <div class="absolute w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl -z-10 animate-pulse"></div>
+        <img id="p-img" src="https://via.placeholder.com/150" class="w-40 h-40 rounded-[2.5rem] object-cover floating border-4 border-indigo-500/20 mb-8 shadow-2xl">
+        <h1 class="text-6xl md:text-8xl font-black mb-4 text-center">Noel <span class="gradient-text">Thomas</span> Robin</h1>
+        <p id="p-tag" class="text-xl md:text-2xl opacity-70 font-medium italic">S2 Computer Science Engineer @ SJCET</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 space-y-40 pb-32">
+        
+        <section class="grid md:grid-cols-2 gap-16 items-center">
+            <div class="glass p-8 rounded-[3rem] shadow-2xl">
+                <canvas id="skillRadar"></canvas>
+            </div>
+            <div class="space-y-6">
+                <h2 class="text-4xl font-bold">The <span class="text-indigo-500">Neural</span> Net</h2>
+                <p class="text-lg opacity-60">My technical evolution is non-linear. I balance core CSE logic with creative UI design and hardware performance tuning.</p>
+                <div id="stat-grid" class="grid grid-cols-2 gap-4 pt-4">
+                    </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-4xl font-bold mb-16 text-center">Academic <span class="text-pink-500">Timeline</span></h2>
+            <div class="relative flex flex-col gap-12 items-center">
+                <div class="timeline-line absolute h-full left-1/2 -translate-x-1/2 top-0 -z-10"></div>
+                
+                <div class="glass p-6 w-full max-w-md rounded-2xl relative translate-x-[-20px] md:translate-x-[-150px]">
+                    <h3 class="font-bold text-indigo-400">Semester 01</h3>
+                    <p class="text-sm opacity-70">Fundamentals & Physics Exam. Completed.</p>
+                </div>
+                <div class="glass p-6 w-full max-w-md rounded-2xl relative translate-x-[20px] md:translate-x-[150px]">
+                    <h3 class="font-bold text-pink-400">Semester 02</h3>
+                    <p class="text-sm opacity-70">Current Phase. Diving into DSA and Hardware. </p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="terminal-box rounded-2xl p-6 shadow-2xl border border-white/5">
+                <div class="flex gap-2 mb-4 border-b border-white/10 pb-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span class="text-xs text-white/30 ml-2">ntr-os — 127.0.0.1</span>
+                </div>
+                <div id="term-out" class="text-sm mb-4 leading-relaxed">System ready... Type 'help' to begin.</div>
+                <div class="flex items-center">
+                    <span class="text-indigo-400 mr-2">λ</span>
+                    <input type="text" id="term-in" class="bg-transparent border-none outline-none text-white w-full" autofocus>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        const db = JSON.parse(localStorage.getItem('ntr_vault')) || {
+            name: "Noel Thomas Robin", tagline: "S2 CSE Engineer @ SJCET",
+            skills: [85, 75, 90, 70, 80, 85],
+            labels: ['Coding', 'Design', 'Linux', 'Hardware', 'DSA', 'Logic']
+        };
+
+        // Initialize Radar
+        const ctx = document.getElementById('skillRadar').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: db.labels,
+                datasets: [{
+                    data: db.skills,
+                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                    borderColor: '#6366f1',
+                    pointBackgroundColor: '#ec4899',
+                    borderWidth: 3
+                }]
+            },
+            options: { scales: { r: { angleLines: {color: 'rgba(128,128,128,0.2)'}, grid: {color: 'rgba(128,128,128,0.2)'}, ticks: {display: false}, pointLabels: {color: '#888', font: {size: 14}} } }, plugins: {legend: {display: false}} }
+        });
+
+        // Terminal logic
+        const input = document.getElementById('term-in');
+        const output = document.getElementById('term-out');
+        input.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter'){
+                const cmd = input.value.toLowerCase();
+                let res = "";
+                if(cmd === 'help') res = "Commands: whoami, tech, source, clear";
+                else if(cmd === 'whoami') res = "System ID: Noel. Status: S2 Engineering Student.";
+                else if(cmd === 'tech') res = "Stack: Figma, Lubuntu, Python, SQL, Git.";
+                else if(cmd === 'source') res = "Running on custom NTR-Vault v2.0";
+                else if(cmd === 'clear') { output.innerHTML = "System ready..."; input.value = ""; return; }
+                else res = "Unknown sector.";
+                
+                output.innerHTML += `<div class="mt-2 text-white/50">> ${cmd}</div><div>${res}</div>`;
+                input.value = "";
+                output.scrollTop = output.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
