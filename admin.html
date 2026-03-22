@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NTR | Mission Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; }
+        .card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 2rem; border-radius: 2rem; }
+        .accent-slider { accent-color: #6366f1; }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+    
+    <div id="gate" class="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center space-y-6">
+        <h1 class="text-indigo-500 font-black text-2xl tracking-[1em]">ACCESS_RESTRICTED</h1>
+        <input type="password" id="pass" class="bg-transparent border-b-2 border-indigo-500 text-center outline-none text-2xl w-64" placeholder="KEY CODE">
+        <button onclick="checkPass()" class="bg-indigo-600 px-10 py-2 rounded-full font-bold">DECRYPT</button>
+    </div>
+
+    <div class="max-w-3xl mx-auto space-y-12">
+        <header class="flex justify-between items-end">
+            <div>
+                <h1 class="text-4xl font-black">Control <span class="text-indigo-500">Center</span></h1>
+                <p class="opacity-40">Update your neural levels and identity.</p>
+            </div>
+            <button onclick="save()" class="bg-indigo-600 px-8 py-3 rounded-2xl font-black shadow-lg shadow-indigo-500/30 active:scale-95 transition">SYNC DATA</button>
+        </header>
+
+        <section class="grid gap-6">
+            <div class="card">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-600 mb-6">Identity</h2>
+                <input id="in-name" type="text" placeholder="Full Name" class="w-full bg-zinc-900 p-4 rounded-xl mb-4 border border-zinc-800 outline-none">
+                <input id="in-tag" type="text" placeholder="Tagline (e.g. S2 CSE Student)" class="w-full bg-zinc-900 p-4 rounded-xl border border-zinc-800 outline-none">
+            </div>
+
+            <div class="card">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-600 mb-6">Neural Calibration (Skill Radar)</h2>
+                <div id="skill-box" class="space-y-6">
+                    </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const labels = ['Coding', 'Design', 'Linux', 'Hardware', 'DSA', 'Logic'];
+        let db = JSON.parse(localStorage.getItem('ntr_vault')) || {
+            name: "Noel Thomas Robin", tagline: "S2 CSE @ SJCET",
+            skills: [85, 75, 90, 70, 80, 85]
+        };
+
+        function checkPass() {
+            if(document.getElementById('pass').value === 'JMJ_ntr123') {
+                document.getElementById('gate').style.display = 'none';
+                init();
+            }
+        }
+
+        function init() {
+            document.getElementById('in-name').value = db.name;
+            document.getElementById('in-tag').value = db.tagline;
+            const box = document.getElementById('skill-box');
+            labels.forEach((l, i) => {
+                box.innerHTML += `
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm"><span class="opacity-50">${l}</span><span class="text-indigo-400 font-mono">${db.skills[i]}%</span></div>
+                        <input type="range" class="s accent-slider w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer" value="${db.skills[i]}">
+                    </div>
+                `;
+            });
+        }
+
+        function save() {
+            db.name = document.getElementById('in-name').value;
+            db.tagline = document.getElementById('in-tag').value;
+            db.skills = Array.from(document.querySelectorAll('.s')).map(s => parseInt(s.value));
+            localStorage.setItem('ntr_vault', JSON.stringify(db));
+            alert("System Synced Successfully!");
+            location.reload();
+        }
+    </script>
+</body>
+</html>
